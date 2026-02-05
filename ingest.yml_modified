@@ -1,0 +1,34 @@
+name: Meme ingestion
+
+# This workflow runs the ingestion script on a schedule to pull new memes
+# from Reddit, filter out NSFW and duplicate content, and insert them into
+# your Supabase database.  It can also be triggered manually via the
+# workflow_dispatch event.
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Run every six hours
+    - cron: '0 */6 * * *'
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Install required dependencies; omit nsfw-detector since NSFW filtering is disabled.
+          pip install requests Pillow imagehash numpy supabase
+      - name: Run ingestion script
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          REDDIT_USER_AGENT: ${{ secrets.REDDIT_USER_AGENT }}
+        run: python scripts/ingest_memes.py
