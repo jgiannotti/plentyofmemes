@@ -1,0 +1,13 @@
+# Netlify configuration for PlentyOfMemes
+
+# This configuration tells Netlify how to build and deploy the site.
+# The build command runs a small shell script that replaces the
+# Supabase placeholders in our static HTML with actual values from
+# Netlify environment variables.  The resulting files are then
+# published from the `public` directory.
+
+[build]
+  # Run our build script to inline Supabase environment variables
+  command = "bash scripts/build.sh"
+  # Directory to publish after build completes
+  publish = "public"
