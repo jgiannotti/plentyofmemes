@@ -51,6 +51,8 @@ except ImportError:
 
 
 def error(message: str) -> None:
+    https://github.com/jgiannotti/plentyofmemes/blob/main/ingest_memes_auto.py
+    
     """Prints an error message and exits."""
     print(f"ERROR: {message}", file=sys.stderr)
     sys.exit(1)
@@ -252,11 +254,13 @@ def insert_pending(supabase: 'Client', candidates: List[MemeCandidate]) -> None:
             'author': cand.author,
             'score': cand.score,
             'md5': cand.md5,
+                    'status': 'approved',
+                    'published_at': datetime.datetime.utcnow().isoformat(),
             'phash': cand.phash,
             'nsfw_score': cand.nsfw_score,
             'duplicate_of': cand.duplicate_of,
             # Auto‑approve all memes so they appear in the public feed immediately
-            'status': 'approved'
+            
         })
     try:
         res = supabase.table('memes').insert(rows).execute()
@@ -270,7 +274,7 @@ def main() -> None:
     global NSFW_MODEL
     if create_client is None:
         error("The supabase-py library is not installed.  Please run `pip install supabase`.")
-    # Read environment variables
+    # Read environ
     supabase_url = get_env('SUPABASE_URL')
     supabase_key = get_env('SUPABASE_SERVICE_ROLE_KEY')
     reddit_user_agent = os.getenv('REDDIT_USER_AGENT', 'plentyofmemes/1.0 (+https://plentyofmemes.com)')
