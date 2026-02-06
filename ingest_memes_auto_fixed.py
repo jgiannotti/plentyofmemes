@@ -264,7 +264,7 @@ def insert_pending(supabase: 'Client', candidates: List[MemeCandidate]) -> None:
             'nsfw_score': cand.nsfw_score,
             'duplicate_of': cand.duplicate_of,
             'status': 'approved',
-            'published_at': datetime.datetime.utcnow().isoformat()
+            ' 'published_at': datetime.datetime.utcnow().isoformat() + 'Z'
         })
     try:
         res = supabase.table('memes').insert(rows).execute()
