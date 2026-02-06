@@ -41,7 +41,7 @@ try:
     # installs this dependency.
     from nsfw_detector import predict
 except ImportError:
-    predict = None  # type: ignore
+     = None  # type: ignore
 
 try:
     # supabase-py client; if not installed the script will exit with
@@ -53,7 +53,7 @@ except ImportError:
 
 
 def error(message: str) -> None:
-    https://github.com/jgiannotti/plentyofmemes/blob/main/ingest_memes_auto.py
+  
     
     """Prints an error message and exits."""
     print(f"ERROR: {message}", file=sys.stderr)
@@ -67,7 +67,7 @@ def get_env(name: str) -> str:
     return value
 
 
-@dataclass
+
 class MemeCandidate:
     """Represents a meme fetched from Reddit."""
 
