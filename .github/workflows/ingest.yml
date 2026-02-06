@@ -17,7 +17,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install praw Pillow python-dotenv imagehash numpy requests
+          pip install praw Pillow python-dotenv imagehash numpy requests supabase
       - name: Run ingestion script
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
