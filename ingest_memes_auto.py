@@ -41,7 +41,7 @@ try:
     # installs this dependency.
     from nsfw_detector import predict
 except ImportError:
-     = None  # type: ignore
+   predict = None  # type: ignore
 
 try:
     # supabase-py client; if not installed the script will exit with
@@ -63,6 +63,8 @@ def error(message: str) -> None:
 def get_env(name: str) -> str:
     value = os.getenv(name)
     if not value:
+        error(f"Missing required environment variable {name}")
+       return value
         error(f"Missing required environment variable {name}")
     return value
 
