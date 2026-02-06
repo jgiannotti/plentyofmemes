@@ -33,6 +33,9 @@ from PIL import Image
 from io import BytesIO
 import imagehash
 
+# Used for generating published_at timestamps on inserted memes
+import datetime
+
 try:
     # nsfw_detector pulls in tensorflow; import lazily to avoid heavy
     # startup cost if the module is missing.  The GitHub Actions workflow
@@ -57,8 +60,10 @@ def error(message: str) -> None:
 
 
 def get_env(name: str) -> str:
+    """Retrieve a required environment variable or exit with an error."""
     value = os.getenv(name)
     if not value:
+        # Report missing environment variable and abort
         error(f"Missing required environment variable {name}")
     return value
 
@@ -229,10 +234,9 @@ def insert_pending(supabase: 'Client', candidates: List[MemeCandidate]) -> None:
     existing_md5, existing_phash = load_existing_hashes(supabase)
     to_insert = []
     for cand in candidates:
-        # Download image, compute MD5, pHash and NSFW score
-        if not cand.download_and_process(NSFW_MODEL):
-            # Skip NSFW images
-            continue
+        # Download image, compute MD5, pHash and NSFW score (we compute the NSFW score but do not filter out NSFW content)
+        # Calling download_and_process will set md5, phash and nsfw_score on the candidate.
+        cand.download_and_process(NSFW_MODEL)
         dup_id = find_duplicate(cand, existing_md5, existing_phash)
         cand.duplicate_of = dup_id
         # Only insert if not exact duplicate; near duplicates are allowed but flagged
@@ -246,6 +250,9 @@ def insert_pending(supabase: 'Client', candidates: List[MemeCandidate]) -> None:
     # Prepare rows for insertion
     rows = []
     for cand in to_insert:
+        # Build the row dictionary. We include a published_at timestamp to
+        # ensure the frontend displays the meme immediately. The status is set
+        # to 'approved' so no manual moderation is required.
         rows.append({
             'title': cand.title,
             'image_url': cand.image_url,
@@ -256,7 +263,8 @@ def insert_pending(supabase: 'Client', candidates: List[MemeCandidate]) -> None:
             'phash': cand.phash,
             'nsfw_score': cand.nsfw_score,
             'duplicate_of': cand.duplicate_of,
-            'status': 'pending'
+            'status': 'approved',
+            'published_at': datetime.datetime.utcnow().isoformat()
         })
     try:
         res = supabase.table('memes').insert(rows).execute()
